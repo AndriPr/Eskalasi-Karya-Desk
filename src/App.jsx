@@ -66,7 +66,7 @@ function TypewriterText({ text }) {
 
     return (
         <motion.span 
-            className="inline-flex items-center text-primary cursor-pointer font-latin text-[1.2em]"
+            className="inline-flex items-center text-primary cursor-pointer font-latin text-[1.5em]"
             whileHover={{
                 x: [0, -3, 3, -3, 3, 0],
                 textShadow: [
@@ -133,10 +133,10 @@ function DynamicGreeting() {
     useEffect(() => {
         const updateGreeting = () => {
             const hour = new Date().getHours();
-            if (hour >= 0 && hour < 12) setGreeting('Selamat Pagi,');
-            else if (hour >= 12 && hour < 15) setGreeting('Selamat Siang,');
-            else if (hour >= 15 && hour < 19) setGreeting('Selamat Sore,');
-            else setGreeting('Selamat Malam,');
+            if (hour >= 0 && hour < 12) setGreeting('Pagi,');
+            else if (hour >= 12 && hour < 15) setGreeting('Siang,');
+            else if (hour >= 15 && hour < 19) setGreeting('Sore,');
+            else setGreeting('Malam,');
         };
         updateGreeting();
         const intervalId = setInterval(updateGreeting, 60000);
