@@ -203,7 +203,8 @@ function App() {
                 {/* Grid Service Cards */}
                 <motion.section 
                     variants={containerVariants}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    style={{ opacity: heroOpacity, scale: heroScale }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 origin-top"
                 >
                     <GlassCard 
                         href="#" 
@@ -234,7 +235,7 @@ function App() {
                 </motion.section>
 
                 {/* Secondary Info */}
-                <motion.section variants={itemVariants} className="max-w-2xl mx-auto w-full pb-8">
+                <motion.section variants={itemVariants} style={{ opacity: heroOpacity, scale: heroScale }} className="max-w-2xl mx-auto w-full pb-8 origin-top">
                     <div 
                         className="glass-card rounded-[2.5rem] p-8 flex flex-col justify-center items-center text-center space-y-4 border-error/10 relative z-10"
                         onMouseMove={(e) => {
