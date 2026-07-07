@@ -133,8 +133,12 @@ function GlassCard({ href, icon, title, description, onClick, style }) {
         <motion.a 
             variants={itemVariants}
             style={{ ...style, rotateX, rotateY, transformStyle: "preserve-3d" }}
-            whileHover={{ scale: 1.03 }}
+            whileHover={{ scale: 1.03, zIndex: 50 }}
             whileTap={{ scale: 0.97 }}
+            drag
+            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            dragElastic={0.3}
+            draggable={false}
             ref={cardRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
@@ -239,6 +243,33 @@ function LofiWidget() {
     );
 }
 
+function Firework({ x, y, onComplete }) {
+    const particles = Array.from({ length: 16 });
+    return (
+        <div style={{ position: 'fixed', left: x, top: y, pointerEvents: 'none', zIndex: 10000 }}>
+            {particles.map((_, i) => {
+                const angle = (i / particles.length) * Math.PI * 2;
+                const distance = 30 + Math.random() * 50;
+                return (
+                    <motion.div
+                        key={i}
+                        initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+                        animate={{ 
+                            x: Math.cos(angle) * distance, 
+                            y: Math.sin(angle) * distance,
+                            scale: [0, 1.2, 0],
+                            opacity: [1, 1, 0]
+                        }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
+                        onAnimationComplete={i === 0 ? onComplete : undefined}
+                        className="absolute w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,1)]"
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
 const QUOTES = [
     "Karya bukan sekadar kata, melainkan jejak nyata.",
     "Bekerja keras dalam diam, biarkan karyamu yang berbicara.",
@@ -308,6 +339,14 @@ function App() {
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+    const [fireworks, setFireworks] = useState([]);
+
+    const handleLogoClick = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        setFireworks(prev => [...prev, { id: Date.now() + Math.random(), x, y }]);
+    };
 
     const { scrollY } = useScroll();
     const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
@@ -357,18 +396,27 @@ function App() {
             </motion.div>
 
             {/* Top AppBar */}
+            {fireworks.map(fw => (
+                <Firework key={fw.id} x={fw.x} y={fw.y} onComplete={() => setFireworks(prev => prev.filter(f => f.id !== fw.id))} />
+            ))}
+
             <motion.header 
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
                 className="fixed top-5 left-5 right-5 z-40 h-16 max-w-screen-xl mx-auto flex justify-between items-center px-4 rounded-full bg-surface-container/60 backdrop-blur-3xl border border-white/10 shadow-2xl transition-all duration-300"
             >
-                <div className="flex items-center gap-3">
+                <motion.div 
+                    onClick={handleLogoClick}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-3 cursor-pointer"
+                >
                     <div className="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden p-1">
                         <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXhK4o8GvDNDdaPSxp40vzjnfn32uVO5sVDcUje0aLY-sTT8YDda1riFpXgPtnviirRGeHm6bOB0Lf9_drL1HI1xDdBmPkjLTPbHlJthd1nFtxg47D789x-9LetvOR9DQB4ZplRfowmn_0tMtQyytnLx53E-3n_e2dJ6f6Ni-3STWQ86nSoDHcs5aPWub_MG_HI3XOwFRYOlmwayRXP4pmUAb8ep6WAGiXhIwTbD5VIgmghiPoll4MeFZepmigU5Mp5PBWIyB7dF8P" alt="Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="font-headline-lg-mobile text-xl md:text-2xl font-bold text-on-surface tracking-tight">Eskalasi Desk</h1>
-                </div>
+                </motion.div>
                 <RealTimeClock />
             </motion.header>
 
