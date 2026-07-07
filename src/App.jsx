@@ -277,60 +277,64 @@ function LoadingScreen({ onComplete }) {
 }
 
 function CustomCursor() {
-    const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
-    const [ripples, setRipples] = useState([]);
+    const [drops, setDrops] = useState([]);
+    const lastPos = useRef({ x: -100, y: -100 });
 
     useEffect(() => {
-        const updateMousePosition = e => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
-        };
-        
-        const handlePointerDown = e => {
-            // For touch devices, pointerdown gives clientX/Y. We create a burst effect.
-            const newRipple = { id: Date.now(), x: e.clientX, y: e.clientY };
-            setRipples(prev => [...prev, newRipple]);
-            setTimeout(() => {
-                setRipples(prev => prev.filter(r => r.id !== newRipple.id));
-            }, 600);
+        const handleMove = e => {
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            if (clientX === undefined || clientY === undefined) return;
+
+            const dx = clientX - lastPos.current.x;
+            const dy = clientY - lastPos.current.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Spawn every 15 pixels to create a trail
+            if (dist > 15) {
+                lastPos.current = { x: clientX, y: clientY };
+                const newDrop = { id: Date.now() + Math.random(), x: clientX, y: clientY };
+                
+                // Keep max 15 drops to prevent mobile lag
+                setDrops(prev => [...prev.slice(-15), newDrop]);
+
+                setTimeout(() => {
+                    setDrops(prev => prev.filter(d => d.id !== newDrop.id));
+                }, 600); // Lifespan of the water ripple
+            }
         };
 
-        window.addEventListener('mousemove', updateMousePosition);
-        window.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('touchmove', handleMove, { passive: true });
         
         return () => {
-            window.removeEventListener('mousemove', updateMousePosition);
-            window.removeEventListener('pointerdown', handlePointerDown);
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('touchmove', handleMove);
         };
     }, []);
 
     return (
-        <>
-            {/* Desktop continuous cursor (Hidden on mobile) */}
-            <motion.div 
-                className="hidden md:block fixed top-0 left-0 w-3 h-3 bg-primary rounded-full pointer-events-none z-[9999]"
-                animate={{ x: mousePosition.x - 6, y: mousePosition.y - 6 }}
-                transition={{ type: "spring", stiffness: 1000, damping: 40, mass: 0.1 }}
-            />
-            <motion.div 
-                className="hidden md:block fixed top-0 left-0 w-10 h-10 border border-primary/50 rounded-full pointer-events-none z-[9998]"
-                animate={{ x: mousePosition.x - 20, y: mousePosition.y - 20 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25, mass: 0.5 }}
-            />
-
-            {/* Global Tap Ripples (Works on both mobile and desktop) */}
+        <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
             <AnimatePresence>
-                {ripples.map(ripple => (
+                {drops.map(drop => (
                     <motion.div
-                        key={ripple.id}
-                        initial={{ top: ripple.y, left: ripple.x, scale: 0, opacity: 0.8 }}
-                        animate={{ scale: 2.5, opacity: 0 }}
+                        key={drop.id}
+                        initial={{ top: drop.y, left: drop.x, scale: 0.2, opacity: 0.5 }}
+                        animate={{ scale: 3, opacity: 0 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.6, ease: "easeOut" }}
-                        className="fixed w-12 h-12 -ml-6 -mt-6 rounded-full border-[3px] border-primary pointer-events-none z-[10000]"
+                        className="absolute w-8 h-8 -ml-4 -mt-4 rounded-full bg-primary/60 blur-[3px]"
                     />
                 ))}
             </AnimatePresence>
-        </>
+        </div>
     );
 }
 
