@@ -543,7 +543,7 @@ function App() {
                     <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="material-symbols-outlined">home_app_logo</motion.span>
                     <span className="font-label-sm text-[10px] mt-1">Layanan</span>
                 </a>
-                <a className="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors group" href="#">
+                <a className="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors group" href="https://forms.gle/GLAMovi3D2je6tTb6" target="_blank" rel="noopener noreferrer">
                     <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="material-symbols-outlined">fact_check</motion.span>
                     <span className="font-label-sm text-[10px] mt-1 opacity-60 group-hover:opacity-100 transition-opacity">Evaluasi</span>
                 </a>
