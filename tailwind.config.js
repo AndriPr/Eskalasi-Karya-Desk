@@ -75,14 +75,14 @@ export default {
             "section-gap": "32px"
         },
         "fontFamily": {
-            "headline-lg-mobile": ["Sora"],
-            "body-md": ["Geist"],
-            "label-md": ["Geist"],
-            "body-lg": ["Geist"],
-            "headline-xl": ["Sora"],
-            "label-sm": ["Geist"],
-            "headline-lg": ["Sora"],
-            "display-lg": ["Sora"]
+            "headline-lg-mobile": ["Poppins", "sans-serif"],
+            "body-md": ["Poppins", "sans-serif"],
+            "label-md": ["Poppins", "sans-serif"],
+            "body-lg": ["Poppins", "sans-serif"],
+            "headline-xl": ["Poppins", "sans-serif"],
+            "label-sm": ["Poppins", "sans-serif"],
+            "headline-lg": ["Poppins", "sans-serif"],
+            "display-lg": ["Poppins", "sans-serif"]
         },
         "fontSize": {
             "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 
 // Animation Variants
 const containerVariants = {
@@ -66,7 +66,7 @@ function TypewriterText({ text }) {
 
     return (
         <motion.span 
-            className="inline-flex items-center text-primary cursor-pointer"
+            className="inline-flex items-center text-primary cursor-pointer font-bold italic"
             whileHover={{
                 x: [0, -3, 3, -3, 3, 0],
                 textShadow: [
@@ -87,7 +87,7 @@ function TypewriterText({ text }) {
     );
 }
 
-function GlassCard({ href, icon, title, description, onClick }) {
+function GlassCard({ href, icon, title, description, onClick, style }) {
     const cardRef = useRef(null);
 
     const handleMouseMove = (e) => {
@@ -109,6 +109,7 @@ function GlassCard({ href, icon, title, description, onClick }) {
     return (
         <motion.a 
             variants={itemVariants}
+            style={style}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             ref={cardRef}
@@ -128,11 +129,32 @@ function GlassCard({ href, icon, title, description, onClick }) {
 
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+
+    const { scrollY } = useScroll();
+    const backgroundParallax = useTransform(scrollY, [0, 1000], [0, 300]);
+    const heroParallax = useTransform(scrollY, [0, 500], [0, 80]);
+
+    // Card Parallax (different speeds)
+    const card1Y = useTransform(scrollY, [0, 800], [0, 40]);
+    const card2Y = useTransform(scrollY, [0, 800], [0, 80]);
+    const card3Y = useTransform(scrollY, [0, 800], [0, 30]);
+    const card4Y = useTransform(scrollY, [0, 800], [0, 100]);
+    const secondaryY = useTransform(scrollY, [0, 1000], [0, 120]);
 
     return (
-        <div className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen">
+        <div className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen relative">
+            {/* Top Scroll Blur Mask */}
+            <div className="fixed top-0 left-0 right-0 h-28 z-30 pointer-events-none backdrop-blur-[20px]" style={{ maskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)' }}></div>
+            
+            {/* Bottom Scroll Blur Mask */}
+            <div className="fixed bottom-0 left-0 right-0 h-40 z-30 pointer-events-none backdrop-blur-[20px]" style={{ maskImage: 'linear-gradient(to top, black 20%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 20%, transparent 100%)' }}></div>
+
             {/* Fluid Background Layer */}
-            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            <motion.div 
+                style={{ y: backgroundParallax }}
+                className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
+            >
                 <motion.div 
                     animate={{ 
                         x: [0, 100, -50, 0],
@@ -151,7 +173,7 @@ function App() {
                     transition={{ duration: 18, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                     className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2"
                 />
-            </div>
+            </motion.div>
 
             {/* Top AppBar */}
             <motion.header 
@@ -178,11 +200,12 @@ function App() {
                 {/* Hero Section */}
                 <motion.section 
                     variants={itemVariants}
+                    style={{ y: heroParallax }}
                     className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl"
                 >
                     <div className="relative z-10 space-y-4">
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary/20 text-primary font-label-sm uppercase tracking-wider border border-primary/20">KABINET ESKALASI KARYA</span>
-                        <h2 className="font-display-lg text-4xl md:text-5xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2">Halo, <TypewriterText text="Pejuang Karya!" /></h2>
+                        <h2 className="font-display-lg text-4xl md:text-5xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2">Halo, <TypewriterText text="Para Karya!" /></h2>
                         <p className="text-on-surface-variant font-body-lg max-w-xl leading-relaxed">Pusat Layanan & Informasi Kabinet Eskalasi Karya. Temukan semua tautan penting, format surat, dan jadwal kegiatan himpunan di sini.</p>
                     </div>
                 </motion.section>
@@ -193,6 +216,7 @@ function App() {
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
                     <GlassCard 
+                        style={{ y: card1Y }}
                         href="#" 
                         icon="folder_open" 
                         title="Format Surat" 
@@ -200,18 +224,22 @@ function App() {
                         onClick={() => setIsModalOpen(true)}
                     />
                     <GlassCard 
+                        style={{ y: card2Y }}
                         href="https://drive.google.com/file/d/1agGRtc_KfY65_7gw2im5MPhkAgsk8ydw/view?usp=sharing" 
                         icon="account_tree" 
                         title="Alur Pengajuan" 
                         description="Panduan langkah demi langkah administrasi." 
                     />
                     <GlassCard 
-                        href="https://calendar.google.com/calendar/u/0?cid=ZXNrYWxhc2lrYXJ5YWhpbWFza29tQGdtYWlsLmNvbQ" 
+                        style={{ y: card3Y }}
+                        href="#" 
                         icon="calendar_today" 
                         title="Kalender" 
                         description="Jadwal kegiatan dan deadline penting." 
+                        onClick={() => setIsCalendarModalOpen(true)}
                     />
                     <GlassCard 
+                        style={{ y: card4Y }}
                         href="https://drive.google.com/file/d/1JN__a8Vody2GARejUwdY0wwkBYiHieoH/view?usp=sharing" 
                         icon="menu_book" 
                         title="Blueprint" 
@@ -220,7 +248,7 @@ function App() {
                 </motion.section>
 
                 {/* Secondary Info */}
-                <motion.section variants={itemVariants} className="max-w-2xl mx-auto w-full pb-8">
+                <motion.section variants={itemVariants} style={{ y: secondaryY }} className="max-w-2xl mx-auto w-full pb-8">
                     <div 
                         className="glass-card rounded-[2.5rem] p-8 flex flex-col justify-center items-center text-center space-y-4 border-error/10 relative z-10"
                         onMouseMove={(e) => {
@@ -312,6 +340,52 @@ function App() {
                                 <motion.a whileHover={{ x: 5 }} href="https://docs.google.com/document/d/159UJutwMsRuYvW8EoIvwhD0yrNNtCGty/edit?usp=sharing&ouid=104771150630152243275&rtpof=true&sd=true" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-primary/20 text-on-surface hover:text-primary border border-white/5 hover:border-primary/30 transition-all group">
                                     <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">description</span>
                                     <span className="font-label-md">Surat Undangan</span>
+                                </motion.a>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+                {isCalendarModalOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                        onClick={() => setIsCalendarModalOpen(false)}
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="bg-surface-container rounded-3xl p-6 md:p-8 w-full max-w-md border border-white/10 shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-headline-lg text-primary">Pilih Aplikasi Kalender</h2>
+                                <motion.button 
+                                    whileHover={{ scale: 1.1, rotate: 90 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setIsCalendarModalOpen(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-on-surface transition-colors"
+                                >
+                                    <span className="material-symbols-outlined text-lg">close</span>
+                                </motion.button>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <motion.a whileHover={{ x: 5 }} href="https://calendar.google.com/calendar/u/0/r?cid=ZXNrYWxhc2lrYXJ5YWhpbWFza29tQGdtYWlsLmNvbQ" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-primary/20 text-on-surface hover:text-primary border border-white/5 hover:border-primary/30 transition-all group">
+                                    <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">language</span>
+                                    <div className="flex flex-col">
+                                        <span className="font-label-md">Buka di Web (Google Calendar)</span>
+                                        <span className="text-xs text-on-surface-variant">Untuk browser Android & PC</span>
+                                    </div>
+                                </motion.a>
+                                <motion.a whileHover={{ x: 5 }} href="webcal://calendar.google.com/calendar/ical/eskalasikaryahimaskom%40gmail.com/public/basic.ics" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-primary/20 text-on-surface hover:text-primary border border-white/5 hover:border-primary/30 transition-all group">
+                                    <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">app_shortcut</span>
+                                    <div className="flex flex-col">
+                                        <span className="font-label-md">Aplikasi Kalender Bawaan</span>
+                                        <span className="text-xs text-on-surface-variant">Apple Calendar / Microsoft Outlook</span>
+                                    </div>
                                 </motion.a>
                             </div>
                         </motion.div>
