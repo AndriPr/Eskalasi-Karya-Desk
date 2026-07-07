@@ -82,7 +82,8 @@ export default {
             "headline-xl": ["Poppins", "sans-serif"],
             "label-sm": ["Poppins", "sans-serif"],
             "headline-lg": ["Poppins", "sans-serif"],
-            "display-lg": ["Poppins", "sans-serif"]
+            "display-lg": ["Poppins", "sans-serif"],
+            "latin": ["\"Dancing Script\"", "cursive"]
         },
         "fontSize": {
             "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
