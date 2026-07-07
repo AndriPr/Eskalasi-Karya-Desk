@@ -286,7 +286,7 @@ function App() {
                 >
                     <div className="relative z-10 space-y-4">
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary/20 text-primary font-label-sm uppercase tracking-wider border border-primary/20">KABINET ESKALASI KARYA</span>
-                        <h2 className="font-display-lg text-2xl md:text-3xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2"><DynamicGreeting /> <TypewriterText text="Para Karya!" /></h2>
+                        <h2 className="font-display-lg text-2xl md:text-3xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2"><DynamicGreeting /> <TypewriterText text="Para Karya !" /></h2>
                         <p className="text-on-surface-variant font-body-lg max-w-xl leading-relaxed">Pusat Layanan & Informasi Kabinet Eskalasi Karya. Temukan semua tautan penting, format surat, dan jadwal kegiatan himpunan di sini.</p>
                     </div>
                 </motion.section>
