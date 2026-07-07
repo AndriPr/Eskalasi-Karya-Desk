@@ -278,27 +278,58 @@ function LoadingScreen({ onComplete }) {
 
 function CustomCursor() {
     const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
+    const [ripples, setRipples] = useState([]);
 
     useEffect(() => {
         const updateMousePosition = e => {
             setMousePosition({ x: e.clientX, y: e.clientY });
         };
+        
+        const handlePointerDown = e => {
+            // For touch devices, pointerdown gives clientX/Y. We create a burst effect.
+            const newRipple = { id: Date.now(), x: e.clientX, y: e.clientY };
+            setRipples(prev => [...prev, newRipple]);
+            setTimeout(() => {
+                setRipples(prev => prev.filter(r => r.id !== newRipple.id));
+            }, 600);
+        };
+
         window.addEventListener('mousemove', updateMousePosition);
-        return () => window.removeEventListener('mousemove', updateMousePosition);
+        window.addEventListener('pointerdown', handlePointerDown);
+        
+        return () => {
+            window.removeEventListener('mousemove', updateMousePosition);
+            window.removeEventListener('pointerdown', handlePointerDown);
+        };
     }, []);
 
     return (
         <>
+            {/* Desktop continuous cursor (Hidden on mobile) */}
             <motion.div 
-                className="fixed top-0 left-0 w-3 h-3 bg-primary rounded-full pointer-events-none z-[9999]"
+                className="hidden md:block fixed top-0 left-0 w-3 h-3 bg-primary rounded-full pointer-events-none z-[9999]"
                 animate={{ x: mousePosition.x - 6, y: mousePosition.y - 6 }}
                 transition={{ type: "spring", stiffness: 1000, damping: 40, mass: 0.1 }}
             />
             <motion.div 
-                className="fixed top-0 left-0 w-10 h-10 border border-primary/50 rounded-full pointer-events-none z-[9998]"
+                className="hidden md:block fixed top-0 left-0 w-10 h-10 border border-primary/50 rounded-full pointer-events-none z-[9998]"
                 animate={{ x: mousePosition.x - 20, y: mousePosition.y - 20 }}
                 transition={{ type: "spring", stiffness: 200, damping: 25, mass: 0.5 }}
             />
+
+            {/* Global Tap Ripples (Works on both mobile and desktop) */}
+            <AnimatePresence>
+                {ripples.map(ripple => (
+                    <motion.div
+                        key={ripple.id}
+                        initial={{ top: ripple.y, left: ripple.x, scale: 0, opacity: 0.8 }}
+                        animate={{ scale: 2.5, opacity: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        className="fixed w-12 h-12 -ml-6 -mt-6 rounded-full border-[3px] border-primary pointer-events-none z-[10000]"
+                    />
+                ))}
+            </AnimatePresence>
         </>
     );
 }
