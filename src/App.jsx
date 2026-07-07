@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
 
 // Animation Variants
 const containerVariants = {
@@ -89,14 +89,37 @@ function TypewriterText({ text }) {
 
 function GlassCard({ href, icon, title, description, onClick, style }) {
     const cardRef = useRef(null);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const mouseXSpring = useSpring(x);
+    const mouseYSpring = useSpring(y);
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
 
     const handleMouseMove = (e) => {
         if (!cardRef.current) return;
         const rect = cardRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        cardRef.current.style.setProperty('--mouse-x', `${x}px`);
-        cardRef.current.style.setProperty('--mouse-y', `${y}px`);
+        
+        const width = rect.width;
+        const height = rect.height;
+
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const xPct = mouseX / width - 0.5;
+        const yPct = mouseY / height - 0.5;
+
+        x.set(xPct);
+        y.set(yPct);
+
+        cardRef.current.style.setProperty('--mouse-x', `${mouseX}px`);
+        cardRef.current.style.setProperty('--mouse-y', `${mouseY}px`);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
     };
 
     const handleClick = (e) => {
@@ -109,20 +132,21 @@ function GlassCard({ href, icon, title, description, onClick, style }) {
     return (
         <motion.a 
             variants={itemVariants}
-            style={style}
+            style={{ ...style, rotateX, rotateY, transformStyle: "preserve-3d" }}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             ref={cardRef}
             onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
             onClick={handleClick}
             href={href} 
             className="glass-card p-8 rounded-[2rem] flex flex-col items-center text-center group cursor-pointer relative z-10"
         >
-            <div className="w-16 h-16 mb-5 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-500 shadow-lg shadow-primary/5">
+            <div style={{ transform: "translateZ(40px)" }} className="w-16 h-16 mb-5 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-500 shadow-lg shadow-primary/5">
                 <span className="material-symbols-outlined !text-[40px]">{icon}</span>
             </div>
-            <h3 className="font-headline-lg text-lg text-on-surface mb-2">{title}</h3>
-            <p className="text-sm text-on-surface-variant">{description}</p>
+            <h3 style={{ transform: "translateZ(30px)" }} className="font-headline-lg text-lg text-on-surface mb-2">{title}</h3>
+            <p style={{ transform: "translateZ(20px)" }} className="text-sm text-on-surface-variant">{description}</p>
         </motion.a>
     );
 }
@@ -207,7 +231,7 @@ function LofiWidget() {
             </div>
             <button 
                 onClick={togglePlay}
-                className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20"
+                className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20 pointer-events-auto"
             >
                 <span className="material-symbols-outlined">{isPlaying ? 'pause' : 'play_arrow'}</span>
             </button>
@@ -215,7 +239,72 @@ function LofiWidget() {
     );
 }
 
+const QUOTES = [
+    "Karya bukan sekadar kata, melainkan jejak nyata.",
+    "Bekerja keras dalam diam, biarkan karyamu yang berbicara.",
+    "Bukan tentang siapa yang tercepat, tapi siapa yang tak pernah berhenti.",
+    "Setiap tindakan kecil adalah batu bata untuk karya besar."
+];
+
+function LoadingScreen({ onComplete }) {
+    const [quote, setQuote] = useState("");
+    
+    useEffect(() => {
+        setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+        const timer = setTimeout(() => {
+            onComplete();
+        }, 2500);
+        return () => clearTimeout(timer);
+    }, [onComplete]);
+
+    return (
+        <motion.div 
+            key="loading"
+            exit={{ opacity: 0, filter: "blur(10px)" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[1000] bg-surface flex items-center justify-center p-8 text-center"
+        >
+            <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="font-latin text-3xl md:text-5xl text-primary max-w-2xl leading-relaxed"
+            >
+                "{quote}"
+            </motion.h2>
+        </motion.div>
+    );
+}
+
+function CustomCursor() {
+    const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
+
+    useEffect(() => {
+        const updateMousePosition = e => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
+        };
+        window.addEventListener('mousemove', updateMousePosition);
+        return () => window.removeEventListener('mousemove', updateMousePosition);
+    }, []);
+
+    return (
+        <>
+            <motion.div 
+                className="fixed top-0 left-0 w-3 h-3 bg-primary rounded-full pointer-events-none z-[9999]"
+                animate={{ x: mousePosition.x - 6, y: mousePosition.y - 6 }}
+                transition={{ type: "spring", stiffness: 1000, damping: 40, mass: 0.1 }}
+            />
+            <motion.div 
+                className="fixed top-0 left-0 w-10 h-10 border border-primary/50 rounded-full pointer-events-none z-[9998]"
+                animate={{ x: mousePosition.x - 20, y: mousePosition.y - 20 }}
+                transition={{ type: "spring", stiffness: 200, damping: 25, mass: 0.5 }}
+            />
+        </>
+    );
+}
+
 function App() {
+    const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
@@ -224,8 +313,19 @@ function App() {
     const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
 
     return (
-        <div className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen relative">
-            {/* Top Scroll Blur Mask */}
+        <AnimatePresence mode="wait">
+            {isLoading ? (
+                <LoadingScreen onComplete={() => setIsLoading(false)} />
+            ) : (
+                <motion.div 
+                    key="main-app"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen relative cursor-none md:cursor-auto"
+                >
+                    <CustomCursor />
+                    {/* Top Scroll Blur Mask */}
             <div className="fixed top-0 left-0 right-0 h-28 z-30 pointer-events-none backdrop-blur-[20px]" style={{ maskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)' }}></div>
             
             {/* Bottom Scroll Blur Mask */}
@@ -475,8 +575,14 @@ function App() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
-    )
+
+            {/* Floating Music Player Widget */}
+            <LofiWidget />
+            
+        </motion.div>
+        )}
+        </AnimatePresence>
+    );
 }
 
 export default App
