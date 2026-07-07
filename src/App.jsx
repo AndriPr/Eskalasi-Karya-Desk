@@ -132,15 +132,8 @@ function App() {
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
     const { scrollY } = useScroll();
-    const backgroundParallax = useTransform(scrollY, [0, 1000], [0, 300]);
-    const heroParallax = useTransform(scrollY, [0, 500], [0, 80]);
-
-    // Card Parallax (different speeds)
-    const card1Y = useTransform(scrollY, [0, 800], [0, 40]);
-    const card2Y = useTransform(scrollY, [0, 800], [0, 80]);
-    const card3Y = useTransform(scrollY, [0, 800], [0, 30]);
-    const card4Y = useTransform(scrollY, [0, 800], [0, 100]);
-    const secondaryY = useTransform(scrollY, [0, 1000], [0, 120]);
+    const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+    const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
 
     return (
         <div className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen relative">
@@ -151,10 +144,7 @@ function App() {
             <div className="fixed bottom-0 left-0 right-0 h-40 z-30 pointer-events-none backdrop-blur-[20px]" style={{ maskImage: 'linear-gradient(to top, black 20%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 20%, transparent 100%)' }}></div>
 
             {/* Fluid Background Layer */}
-            <motion.div 
-                style={{ y: backgroundParallax }}
-                className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
-            >
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
                 <motion.div 
                     animate={{ 
                         x: [0, 100, -50, 0],
@@ -173,7 +163,7 @@ function App() {
                     transition={{ duration: 18, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                     className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2"
                 />
-            </motion.div>
+            </div>
 
             {/* Top AppBar */}
             <motion.header 
@@ -200,12 +190,12 @@ function App() {
                 {/* Hero Section */}
                 <motion.section 
                     variants={itemVariants}
-                    style={{ y: heroParallax }}
-                    className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl"
+                    style={{ opacity: heroOpacity, scale: heroScale }}
+                    className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl origin-top"
                 >
                     <div className="relative z-10 space-y-4">
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary/20 text-primary font-label-sm uppercase tracking-wider border border-primary/20">KABINET ESKALASI KARYA</span>
-                        <h2 className="font-display-lg text-4xl md:text-5xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2">Halo, <TypewriterText text="Para Karya!" /></h2>
+                        <h2 className="font-display-lg text-3xl md:text-4xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2">Halo, <TypewriterText text="Para Karya!" /></h2>
                         <p className="text-on-surface-variant font-body-lg max-w-xl leading-relaxed">Pusat Layanan & Informasi Kabinet Eskalasi Karya. Temukan semua tautan penting, format surat, dan jadwal kegiatan himpunan di sini.</p>
                     </div>
                 </motion.section>
@@ -216,7 +206,6 @@ function App() {
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
                     <GlassCard 
-                        style={{ y: card1Y }}
                         href="#" 
                         icon="folder_open" 
                         title="Format Surat" 
@@ -224,14 +213,12 @@ function App() {
                         onClick={() => setIsModalOpen(true)}
                     />
                     <GlassCard 
-                        style={{ y: card2Y }}
                         href="https://drive.google.com/file/d/1agGRtc_KfY65_7gw2im5MPhkAgsk8ydw/view?usp=sharing" 
                         icon="account_tree" 
                         title="Alur Pengajuan" 
                         description="Panduan langkah demi langkah administrasi." 
                     />
                     <GlassCard 
-                        style={{ y: card3Y }}
                         href="#" 
                         icon="calendar_today" 
                         title="Kalender" 
@@ -239,7 +226,6 @@ function App() {
                         onClick={() => setIsCalendarModalOpen(true)}
                     />
                     <GlassCard 
-                        style={{ y: card4Y }}
                         href="https://drive.google.com/file/d/1JN__a8Vody2GARejUwdY0wwkBYiHieoH/view?usp=sharing" 
                         icon="menu_book" 
                         title="Blueprint" 
@@ -248,7 +234,7 @@ function App() {
                 </motion.section>
 
                 {/* Secondary Info */}
-                <motion.section variants={itemVariants} style={{ y: secondaryY }} className="max-w-2xl mx-auto w-full pb-8">
+                <motion.section variants={itemVariants} className="max-w-2xl mx-auto w-full pb-8">
                     <div 
                         className="glass-card rounded-[2.5rem] p-8 flex flex-col justify-center items-center text-center space-y-4 border-error/10 relative z-10"
                         onMouseMove={(e) => {
