@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useDragControls } from 'framer-motion'
 
 // Animation Variants
 const containerVariants = {
@@ -91,6 +91,8 @@ function GlassCard({ href, icon, title, description, onClick, style }) {
     const cardRef = useRef(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
+    const dragControls = useDragControls();
+    const [isDragging, setIsDragging] = useState(false);
 
     const mouseXSpring = useSpring(x);
     const mouseYSpring = useSpring(y);
@@ -129,6 +131,23 @@ function GlassCard({ href, icon, title, description, onClick, style }) {
         }
     };
 
+    const handlePointerDown = (e) => {
+        // Start dragging only after holding for 300ms
+        const timer = setTimeout(() => {
+            setIsDragging(true);
+            dragControls.start(e);
+        }, 300);
+        
+        const clearTimer = () => {
+            clearTimeout(timer);
+            setIsDragging(false);
+            window.removeEventListener("pointerup", clearTimer);
+            window.removeEventListener("pointermove", clearTimer);
+        };
+        window.addEventListener("pointerup", clearTimer);
+        window.addEventListener("pointermove", clearTimer);
+    };
+
     return (
         <motion.a 
             variants={itemVariants}
@@ -136,21 +155,24 @@ function GlassCard({ href, icon, title, description, onClick, style }) {
             whileHover={{ scale: 1.03, zIndex: 50 }}
             whileTap={{ scale: 0.97 }}
             drag
+            dragControls={dragControls}
+            dragListener={false} // Disable default drag, use custom long-press
             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
             dragElastic={0.3}
             draggable={false}
             ref={cardRef}
+            onPointerDown={handlePointerDown}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
             href={href} 
-            className="glass-card p-8 rounded-[2rem] flex flex-col items-center text-center group cursor-pointer relative z-10"
+            className={`glass-card p-8 rounded-[2rem] flex flex-col items-center text-center group relative z-10 ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
         >
-            <div style={{ transform: "translateZ(40px)" }} className="w-16 h-16 mb-5 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-500 shadow-lg shadow-primary/5">
+            <div style={{ transform: "translateZ(40px)" }} className="w-16 h-16 mb-5 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-500 shadow-lg shadow-primary/5 pointer-events-none">
                 <span className="material-symbols-outlined !text-[40px]">{icon}</span>
             </div>
-            <h3 style={{ transform: "translateZ(30px)" }} className="font-headline-lg text-lg text-on-surface mb-2">{title}</h3>
-            <p style={{ transform: "translateZ(20px)" }} className="text-sm text-on-surface-variant">{description}</p>
+            <h3 style={{ transform: "translateZ(30px)" }} className="font-headline-lg text-lg text-on-surface mb-2 pointer-events-none">{title}</h3>
+            <p style={{ transform: "translateZ(20px)" }} className="text-sm text-on-surface-variant pointer-events-none">{description}</p>
         </motion.a>
     );
 }
