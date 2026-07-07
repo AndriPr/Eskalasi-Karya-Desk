@@ -132,7 +132,8 @@ function App() {
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
     const { scrollY } = useScroll();
-    const backgroundParallax = useTransform(scrollY, [0, 1000], [0, 200]);
+    const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+    const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
 
     return (
         <div className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen relative">
@@ -144,7 +145,6 @@ function App() {
 
             {/* Fluid Background Layer */}
             <motion.div 
-                style={{ y: backgroundParallax }}
                 className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
             >
                 <motion.div 
@@ -192,7 +192,8 @@ function App() {
                 {/* Hero Section */}
                 <motion.section 
                     variants={itemVariants}
-                    className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl"
+                    style={{ opacity: heroOpacity, scale: heroScale }}
+                    className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl origin-top"
                 >
                     <div className="relative z-10 space-y-4">
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary/20 text-primary font-label-sm uppercase tracking-wider border border-primary/20">KABINET ESKALASI KARYA</span>
