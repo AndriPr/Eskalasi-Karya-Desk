@@ -127,6 +127,94 @@ function GlassCard({ href, icon, title, description, onClick, style }) {
     );
 }
 
+function DynamicGreeting() {
+    const [greeting, setGreeting] = useState('');
+
+    useEffect(() => {
+        const updateGreeting = () => {
+            const hour = new Date().getHours();
+            if (hour >= 0 && hour < 12) setGreeting('Selamat Pagi,');
+            else if (hour >= 12 && hour < 15) setGreeting('Selamat Siang,');
+            else if (hour >= 15 && hour < 19) setGreeting('Selamat Sore,');
+            else setGreeting('Selamat Malam,');
+        };
+        updateGreeting();
+        const intervalId = setInterval(updateGreeting, 60000);
+        return () => clearInterval(intervalId);
+    }, []);
+
+    return <span>{greeting}</span>;
+}
+
+function RealTimeClock() {
+    const [time, setTime] = useState(new Date());
+
+    useEffect(() => {
+        const timerId = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(timerId);
+    }, []);
+
+    return (
+        <span className="font-mono font-medium text-sm text-on-surface-variant bg-surface/50 px-3 py-1 rounded-full border border-white/5">
+            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+    );
+}
+
+function LofiWidget() {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef(null);
+
+    useEffect(() => {
+        if (!audioRef.current) {
+            audioRef.current = new Audio("https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3");
+            audioRef.current.loop = true;
+            audioRef.current.volume = 0.5;
+        }
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, []);
+
+    const togglePlay = () => {
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    return (
+        <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", delay: 1 }}
+            className="fixed bottom-24 md:bottom-28 right-5 z-50 flex items-center gap-3 bg-surface-container-high/80 backdrop-blur-xl p-2.5 rounded-full border border-white/10 shadow-2xl"
+        >
+            <div className="flex gap-1 h-5 mx-2 items-center">
+                {[1, 2, 3].map((i) => (
+                    <motion.div
+                        key={i}
+                        animate={isPlaying ? { height: ["20%", "100%", "40%", "80%", "20%"] } : { height: "20%" }}
+                        transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.2 }}
+                        className="w-1.5 bg-primary rounded-full"
+                    />
+                ))}
+            </div>
+            <button 
+                onClick={togglePlay}
+                className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20"
+            >
+                <span className="material-symbols-outlined">{isPlaying ? 'pause' : 'play_arrow'}</span>
+            </button>
+        </motion.div>
+    );
+}
+
 function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -180,6 +268,7 @@ function App() {
                     </div>
                     <h1 className="font-headline-lg-mobile text-xl md:text-2xl font-bold text-on-surface tracking-tight">Eskalasi Desk</h1>
                 </div>
+                <RealTimeClock />
             </motion.header>
 
             {/* Main Content */}
@@ -197,7 +286,7 @@ function App() {
                 >
                     <div className="relative z-10 space-y-4">
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary/20 text-primary font-label-sm uppercase tracking-wider border border-primary/20">KABINET ESKALASI KARYA</span>
-                        <h2 className="font-display-lg text-3xl md:text-4xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2">Halo, <TypewriterText text="Para Karya!" /></h2>
+                        <h2 className="font-display-lg text-3xl md:text-4xl text-on-surface tracking-tight leading-tight flex flex-wrap items-center gap-x-2"><DynamicGreeting /> <TypewriterText text="Para Karya!" /></h2>
                         <p className="text-on-surface-variant font-body-lg max-w-xl leading-relaxed">Pusat Layanan & Informasi Kabinet Eskalasi Karya. Temukan semua tautan penting, format surat, dan jadwal kegiatan himpunan di sini.</p>
                     </div>
                 </motion.section>
