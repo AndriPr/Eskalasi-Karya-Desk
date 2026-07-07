@@ -243,23 +243,23 @@ function LofiWidget() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", delay: 1 }}
-            className="fixed bottom-24 md:bottom-28 right-5 z-50 flex items-center gap-3 bg-surface-container-high/80 backdrop-blur-xl p-2.5 rounded-full border border-white/10 shadow-2xl"
+            className="fixed bottom-[120px] md:bottom-28 right-5 z-50 flex items-center gap-2 bg-surface-container-high/80 backdrop-blur-xl p-1.5 pl-3 rounded-full border border-white/10 shadow-2xl"
         >
-            <div className="flex gap-1 h-5 mx-2 items-center">
+            <div className="flex gap-1 h-3 mx-1 items-center">
                 {[1, 2, 3].map((i) => (
                     <motion.div
                         key={i}
                         animate={isPlaying ? { height: ["20%", "100%", "40%", "80%", "20%"] } : { height: "20%" }}
                         transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.2 }}
-                        className="w-1.5 bg-primary rounded-full"
+                        className="w-1 bg-primary rounded-full"
                     />
                 ))}
             </div>
             <button 
                 onClick={togglePlay}
-                className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20 pointer-events-auto"
+                className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20 pointer-events-auto"
             >
-                <span className="material-symbols-outlined">{isPlaying ? 'pause' : 'play_arrow'}</span>
+                <span className="material-symbols-outlined text-lg">{isPlaying ? 'pause' : 'play_arrow'}</span>
             </button>
         </motion.div>
     );
