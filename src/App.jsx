@@ -132,8 +132,7 @@ function App() {
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
     const { scrollY } = useScroll();
-    const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-    const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+    const backgroundParallax = useTransform(scrollY, [0, 1000], [0, 200]);
 
     return (
         <div className="font-body-lg text-on-surface overflow-x-hidden pb-32 min-h-screen relative">
@@ -144,7 +143,10 @@ function App() {
             <div className="fixed bottom-0 left-0 right-0 h-40 z-30 pointer-events-none backdrop-blur-[20px]" style={{ maskImage: 'linear-gradient(to top, black 20%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 20%, transparent 100%)' }}></div>
 
             {/* Fluid Background Layer */}
-            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            <motion.div 
+                style={{ y: backgroundParallax }}
+                className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
+            >
                 <motion.div 
                     animate={{ 
                         x: [0, 100, -50, 0],
@@ -163,7 +165,7 @@ function App() {
                     transition={{ duration: 18, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                     className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2"
                 />
-            </div>
+            </motion.div>
 
             {/* Top AppBar */}
             <motion.header 
@@ -190,8 +192,7 @@ function App() {
                 {/* Hero Section */}
                 <motion.section 
                     variants={itemVariants}
-                    style={{ opacity: heroOpacity, scale: heroScale }}
-                    className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl origin-top"
+                    className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest min-h-[260px] flex flex-col justify-center border border-primary/10 shadow-2xl"
                 >
                     <div className="relative z-10 space-y-4">
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary/20 text-primary font-label-sm uppercase tracking-wider border border-primary/20">KABINET ESKALASI KARYA</span>
@@ -203,8 +204,7 @@ function App() {
                 {/* Grid Service Cards */}
                 <motion.section 
                     variants={containerVariants}
-                    style={{ opacity: heroOpacity, scale: heroScale }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 origin-top"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
                     <GlassCard 
                         href="#" 
@@ -235,7 +235,13 @@ function App() {
                 </motion.section>
 
                 {/* Secondary Info */}
-                <motion.section variants={itemVariants} style={{ opacity: heroOpacity, scale: heroScale }} className="max-w-2xl mx-auto w-full pb-8 origin-top">
+                <motion.section 
+                    initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, margin: "-20px" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="max-w-2xl mx-auto w-full pb-8"
+                >
                     <div 
                         className="glass-card rounded-[2.5rem] p-8 flex flex-col justify-center items-center text-center space-y-4 border-error/10 relative z-10"
                         onMouseMove={(e) => {
